@@ -6,6 +6,6 @@ export default defineConfig({
   main: {},
   preload: {},
   renderer: {
-    plugins: [tailwindcss() as any, svelte()]
+    plugins: [tailwindcss() as any, svelte() as any]
   }
 })

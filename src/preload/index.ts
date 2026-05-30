@@ -1,8 +1,21 @@
-import { contextBridge } from 'electron'
+import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
 
 // Custom APIs for renderer
-const api = {}
+const api = {
+  selectRepository: () => ipcRenderer.invoke('select-repository'),
+  getRepoStatus: (repoPath: string) => ipcRenderer.invoke('get-repo-status', repoPath),
+  getCommits: (repoPath: string) => ipcRenderer.invoke('get-commits', repoPath),
+  rewriteCommits: (repoPath: string, updates: Record<string, { authorName: string, authorEmail: string }>, currentBranch: string) => 
+    ipcRenderer.invoke('rewrite-commits', repoPath, updates, currentBranch),
+  onRewriteProgress: (callback: (message: string) => void) => {
+    const listener = (_event: any, message: string) => callback(message)
+    ipcRenderer.on('rewrite-progress', listener)
+    return () => {
+      ipcRenderer.removeListener('rewrite-progress', listener)
+    }
+  }
+}
 
 // Use `contextBridge` APIs to expose Electron APIs to
 // renderer only if context isolation is enabled, otherwise
